@@ -10,6 +10,7 @@ func SetupRoutes() http.Handler {
 
 	r.HandleFunc("GET /users/{userID}", controllers.GetUsers)
 	r.HandleFunc("GET /hello/{world}", controllers.HelloWorld)
+	r.HandleFunc("GET /favicon.ico", controllers.FaviconHandler)
 
 	return r
 

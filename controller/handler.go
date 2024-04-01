@@ -19,3 +19,7 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 		"hello": world,
 	})
 }
+
+func FaviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/images/fav/more.svg")
+}
