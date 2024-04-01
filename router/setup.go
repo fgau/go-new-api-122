@@ -9,6 +9,7 @@ func SetupRoutes() http.Handler {
 	r := http.NewServeMux()
 
 	r.HandleFunc("GET /users/{userID}", controllers.GetUsers)
+	r.HandleFunc("GET /hello/{world}", controllers.HelloWorld)
 
 	return r
 
