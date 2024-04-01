@@ -6,18 +6,15 @@ import (
 	"time"
 )
 
-func RequestLoggerMiddleware(next http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type Middleware func(http.Handler) http.HandlerFunc
 
-		start := time.Now()
-		next.ServeHTTP(w, r)
-		duration := time.Since(start)
+func MiddlewareChain(middlewares ...Middleware) Middleware {
+	return func(next http.Handler) http.HandlerFunc {
+		for i := len(middlewares) - 1; i >= 0; i-- {
+			next = middlewares[i](next)
+		}
 
-		lrw := NewLoggingResponseWriter(w)
-		next.ServeHTTP(lrw, r)
-
-		statusCode := lrw.statusCode
-		log.Printf("%s %s %s - %d in %v", r.Method, r.URL.Path, r.Proto, statusCode, duration)
+		return next.ServeHTTP
 
 	}
 }
@@ -34,4 +31,19 @@ func NewLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.statusCode = code
 	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func RequestLoggerMiddleware(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		start := time.Now()
+		lrw := NewLoggingResponseWriter(w)
+		next.ServeHTTP(lrw, r)
+		duration := time.Since(start)
+
+		statusCode := lrw.statusCode
+		log.Printf("%s %s%s %s %s - %d in %v",
+			r.Method, r.Host, r.URL.Path, r.Proto, r.RemoteAddr, statusCode, duration)
+
+	}
 }

@@ -21,9 +21,13 @@ func NewAPIServer(addr string) *APIServer {
 func (s *APIServer) Run() error {
 	router := router.SetupRoutes()
 
+	midllewareChain := middleware.MiddlewareChain(
+		middleware.RequestLoggerMiddleware,
+	)
+
 	server := http.Server{
 		Addr:    s.addr,
-		Handler: middleware.RequestLoggerMiddleware(router),
+		Handler: midllewareChain(router),
 	}
 
 	log.Printf("Server has started %s", s.addr)
